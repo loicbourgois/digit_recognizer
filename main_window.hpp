@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include "brain.hpp"
-#include "digit.hpp"
+#include "image.hpp"
 
 namespace Ui {
 class MainWindow;
@@ -28,13 +28,13 @@ private slots:
 private:
     Ui::MainWindow *ui;
     std::vector<Brain*> brains;
-    std::vector<Digit*> digits;
+    std::vector<Digit*> images;
 
     int brainCount;
     int neuronPerBrain;
-    int digitCount;
+    int imageCount;
 
     QTimer * timerAdvance;
     QTimer * timerRefresh;
-    int digitId;
+    int imageId;
 };

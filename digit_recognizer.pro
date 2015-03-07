@@ -16,14 +16,14 @@ SOURCES += main.cpp\
         main_window.cpp \
     neuron.cpp \
     brain.cpp \
-    digit.cpp \
-    util.cpp
+    util.cpp \
+    image.cpp
 
 HEADERS  += main_window.hpp \
     neuron.hpp \
     brain.hpp \
     util.hpp \
-    digit.hpp
+    image.hpp
 
 FORMS    += main_window.ui
 

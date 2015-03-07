@@ -1,4 +1,4 @@
-#include "digit.hpp"
+#include "image.hpp"
 
 #include <QStringList>
 #include <QDebug>

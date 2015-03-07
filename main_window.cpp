@@ -10,14 +10,14 @@ MainWindow::MainWindow(QWidget *parent) :
     brains(),
     brainCount(10),
     neuronPerBrain(20),
-    digitCount(42),
+    imageCount(42),
     timerAdvance(new QTimer(this)),
     timerRefresh(new QTimer(this)),
-    digitId(0)
+    imageId(0)
 {
     ui->setupUi(this);
     ui->spinBoxImageId->setMinimum(-1);
-    ui->spinBoxImageId->setMaximum(digitCount);
+    ui->spinBoxImageId->setMaximum(imageCount);
 
 
     QSplitterHandle *handle = ui->splitter->handle(1);
@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     layout->addWidget(line);
 
     //  Images
-    QFile file("./digits/train.csv");
+    QFile file("C:/Users/Loic/coding/digits/train.csv");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         qDebug() << "impossible d'ouvrir le fichier";
@@ -39,10 +39,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QTextStream in(&file);
     in.readLine();
     int a = 0;
-    while (!in.atEnd() && a < digitCount ) {
+    while (!in.atEnd() && a < imageCount ) {
         a++;
         QString line = in.readLine();
-        digits.push_back(new Digit(line));
+        images.push_back(new Digit(line));
     }
     //  Brains
     for(int i = 0 ; i < brainCount ; i++)
@@ -63,28 +63,28 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_spinBoxImageId_valueChanged(int i)
 {
-    digitId = i;
-    digitId = (digitId + digitCount) % digitCount;
-    ui->spinBoxImageId->setValue(digitId);
+    imageId = i;
+    imageId = (imageId + imageCount) % imageCount;
+    ui->spinBoxImageId->setValue(imageId);
 }
 
 void MainWindow::onTimerAdvance()
 {
-    digitId++;
-    digitId %= digitCount;
-    std::vector<float> inputs = digits[digitId]->getPixels();
+    imageId++;
+    imageId %= imageCount;
+    std::vector<float> inputs = images[imageId]->getPixels();
     for(int i = 0 ; i < brainCount ; i++)
     {
         brains[i]->compute(inputs);
-        qDebug() << digits[digitId]->getValue() << brains[i]->getDecision();
+        qDebug() << images[imageId]->getValue() << brains[i]->getDecision();
     }
 }
 
 void MainWindow::onTimerRefresh()
 {
-    ui->spinBoxImageId->setValue(digitId);
-    ui->labelValue->setText(QString::number(digits[digitId]->getValue()));
-    ui->labelImage->setPixmap(QPixmap::fromImage(digits[digitId]->getImage()));
+    ui->spinBoxImageId->setValue(imageId);
+    ui->labelValue->setText(QString::number(images[imageId]->getValue()));
+    ui->labelImage->setPixmap(QPixmap::fromImage(images[imageId]->getImage()));
 }
 
 void MainWindow::on_pushButtonGo_clicked()
