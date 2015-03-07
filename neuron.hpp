@@ -8,7 +8,7 @@ public:
     Neuron(std::vector<float> dna, int inputCount);
     float getOutput();
     void compute(std::vector<float> inputValues);
-    void reset();
+    void resetOutput();
 private:
     void setCoefficients(std::vector<float> dna);
     std::vector<float> coefficients;

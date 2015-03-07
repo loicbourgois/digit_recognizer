@@ -5,6 +5,8 @@
 #include <QTimer>
 #include "brain.hpp"
 #include "image.hpp"
+#include "brain_form.hpp"
+#include "ui_brain_form.h"
 
 namespace Ui {
 class MainWindow;
@@ -26,13 +28,20 @@ private slots:
     void on_pushButtonGo_clicked();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow * ui;
+    std::vector<BrainForm *> brainForms;
+
     std::vector<Brain*> brains;
     std::vector<Digit*> images;
 
+
+    int imageCount;
+
     int brainCount;
     int neuronPerBrain;
-    int imageCount;
+    int loopPerCompute;
+
+    int steps;
 
     QTimer * timerAdvance;
     QTimer * timerRefresh;

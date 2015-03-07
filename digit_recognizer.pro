@@ -17,15 +17,18 @@ SOURCES += main.cpp\
     neuron.cpp \
     brain.cpp \
     util.cpp \
-    image.cpp
+    image.cpp \
+    brain_form.cpp
 
 HEADERS  += main_window.hpp \
     neuron.hpp \
     brain.hpp \
     util.hpp \
-    image.hpp
+    image.hpp \
+    brain_form.hpp
 
-FORMS    += main_window.ui
+FORMS    += main_window.ui \
+    brain_form.ui
 
 CONFIG += mobility
 MOBILITY = 

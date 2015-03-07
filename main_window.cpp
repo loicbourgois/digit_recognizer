@@ -8,12 +8,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     brains(),
-    brainCount(10),
+    brainCount(16),
     neuronPerBrain(20),
-    imageCount(42),
+    loopPerCompute(4),
+    imageCount(10000),
     timerAdvance(new QTimer(this)),
     timerRefresh(new QTimer(this)),
-    imageId(0)
+    imageId(0),
+    steps(0)
 {
     ui->setupUi(this);
     ui->spinBoxImageId->setMinimum(-1);
@@ -48,12 +50,14 @@ MainWindow::MainWindow(QWidget *parent) :
     for(int i = 0 ; i < brainCount ; i++)
     {
         brains.push_back(new Brain(neuronPerBrain, 28*28));
+        brainForms.push_back(new BrainForm(this));
+        ui->widgetBrains->layout()->addWidget(brainForms[i]);
     }
     // Go !
     QObject::connect(timerAdvance, SIGNAL(timeout()), this, SLOT(onTimerAdvance()));
     QObject::connect(timerRefresh, SIGNAL(timeout()), this, SLOT(onTimerRefresh()));
     timerRefresh->start(1000/10);
-    //timerRefresh->start(1000/10);
+    timerAdvance->start(1000/1000);
 }
 
 MainWindow::~MainWindow()
@@ -70,26 +74,51 @@ void MainWindow::on_spinBoxImageId_valueChanged(int i)
 
 void MainWindow::onTimerAdvance()
 {
+    // Select image
     imageId++;
     imageId %= imageCount;
     std::vector<float> inputs = images[imageId]->getPixels();
+    // Compute
+    float averageRatio = 0.0f;
     for(int i = 0 ; i < brainCount ; i++)
     {
-        brains[i]->compute(inputs);
-        qDebug() << images[imageId]->getValue() << brains[i]->getDecision();
+        brains[i]->train(loopPerCompute, inputs, images[imageId]->getValue());
+        averageRatio += brains[i]->getRatio();
     }
+    averageRatio /= (float)brainCount;
+    Brain::setAverageRatio(averageRatio);
+
+    //  Mutate ?
+    if(!(steps %= Brain::getRoundToMutaion()))
+    {
+        for(int i = 0 ; i < brainCount ; i++)
+        {
+            brains[i]->mutateMaybe();
+        }
+    }
+    steps++;
 }
 
 void MainWindow::onTimerRefresh()
 {
+    // Image ?
     ui->spinBoxImageId->setValue(imageId);
     ui->labelValue->setText(QString::number(images[imageId]->getValue()));
     ui->labelImage->setPixmap(QPixmap::fromImage(images[imageId]->getImage()));
+    //
+    //qDebug() << "**************************************";
+    for(int i = 0 ; i < brainCount ; i++)
+    {
+        brainForms[i]->ui->labelDecision->setText(QString::number(brains[i]->getDecision()));
+        brainForms[i]->ui->labelAge->setText(QString::number(brains[i]->getAge()));
+        brainForms[i]->ui->labelRatio->setText(QString::number(brains[i]->getRatio(), 'f', 4));
+        brainForms[i]->ui->labelWin->setText(QString::number(brains[i]->getWinCount()));
+        brainForms[i]->ui->labelLose->setText(QString::number(brains[i]->getLoseCount()));
+    }
+    ui->labelAverage->setText(QString::number(Brain::getAverageRatio(), 'f', 4));
 }
 
 void MainWindow::on_pushButtonGo_clicked()
 {
     onTimerAdvance();
-
-
 }

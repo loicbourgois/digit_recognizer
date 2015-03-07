@@ -13,7 +13,7 @@ Neuron::Neuron(std::vector<float> dna, int inputCount)
     {
         setCoefficients(dna);
     }
-
+    outputValue = 0.0f;
 }
 
 float Neuron::getOutput()
@@ -42,9 +42,9 @@ void Neuron::compute(std::vector<float> inputValues)
         qDebug() << "Coefficient count not matching inputs.";
 }
 
-void Neuron::reset()
+void Neuron::resetOutput()
 {
-    outputValue = 0;
+    outputValue = 0.0f;
 }
 
 void Neuron::setCoefficients(std::vector<float> dna)
