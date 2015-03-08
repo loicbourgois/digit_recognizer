@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(timerAdvance, SIGNAL(timeout()), this, SLOT(onTimerAdvance()));
     QObject::connect(timerRefresh, SIGNAL(timeout()), this, SLOT(onTimerRefresh()));
     timerRefresh->start(1000/10);
-    timerAdvance->start(1000/1000);
+    timerAdvance->start(0);
 }
 
 MainWindow::~MainWindow()

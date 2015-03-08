@@ -218,7 +218,7 @@ void Brain::setDna(std::vector<float> dna)
         {
             this->dna[i] = dna[i];
         }
-        buildPhenotype();
+        //buildPhenotype();
     }
 }
 
@@ -234,8 +234,14 @@ void Brain::setRandomDna()
 
 void Brain::buildPhenotype()
 {
+    // Delete
+    for(int i =  0 ; i < neurons.size() ; i++)
+    {
+        delete neurons[i];
+    }
     neurons.clear();
-    neurons.resize(neuronCount);
+    // Create
+    neurons.resize(neuronCount, nullptr);
     for(int i =  0 ; i < neuronCount ; i++)
     {
         std::vector<float> neuronDna(&dna[i * inputPerNeuronCount], &dna[(i+1) * inputPerNeuronCount]);
