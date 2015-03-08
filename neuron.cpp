@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <math.h>
 
-Neuron::Neuron(std::vector<float> dna, int inputCount)
+Neuron::Neuron(std::vector<float> dna, unsigned int inputCount)
 {
     if(inputCount != dna.size())
     {

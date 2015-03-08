@@ -46,14 +46,13 @@ private:
     static Brain *  bestBrain;
     static float bestRatio;
 
-
+    std::vector<Neuron*> neurons;
+    std::vector<float> dna;
     int neuronCount;
     int inputPerNeuronCount;
     int externalInputPerNeuronCount;
     unsigned int dnaSize;
 
-    std::vector<Neuron*> neurons;
-    std::vector<float> dna;
     int age;
     int winsCount;
     int loseCount;

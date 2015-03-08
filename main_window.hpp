@@ -30,20 +30,16 @@ private slots:
 private:
     Ui::MainWindow * ui;
     std::vector<BrainForm *> brainForms;
+    QTimer * timerAdvance;
+    QTimer * timerRefresh;
 
     std::vector<Brain*> brains;
     std::vector<Digit*> images;
 
-
     int imageCount;
-
     int brainCount;
     int neuronPerBrain;
     int loopPerCompute;
-
     int steps;
-
-    QTimer * timerAdvance;
-    QTimer * timerRefresh;
     int imageId;
 };

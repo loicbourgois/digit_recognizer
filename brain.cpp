@@ -8,7 +8,11 @@ Brain * Brain::bestBrain = nullptr;
 float Brain::bestRatio = 0;
 
 Brain::Brain(int neuronCount, int externalInputPerNeuronCount) :
+    neurons(),
+    dna(),
     neuronCount(neuronCount),
+    inputPerNeuronCount(0),
+    externalInputPerNeuronCount(0),
     dnaSize(0),
     age(0),
     winsCount(0),
@@ -70,7 +74,7 @@ void Brain::train(float loop, std::vector<float> inputs, int wantedValue)
 
 void Brain::mutateDna(float r1, float r2, float r3)
 {
-    for(int i = 0 ; i < dnaSize ; i++)
+    for(unsigned int i = 0 ; i < dnaSize ; i++)
     {
         if(rand() < RAND_MAX * r1) // ratio apparition mutation
         {

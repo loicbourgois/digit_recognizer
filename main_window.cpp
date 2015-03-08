@@ -7,15 +7,18 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    brains(),
-    brainCount(16),
-    neuronPerBrain(20),
-    loopPerCompute(4),
-    imageCount(10000),
+    brainForms(),
     timerAdvance(new QTimer(this)),
     timerRefresh(new QTimer(this)),
-    imageId(0),
-    steps(0)
+    brains(),
+    images(),
+    imageCount(42000),
+    brainCount(10),
+    neuronPerBrain(20),
+    loopPerCompute(5),
+    steps(0),
+    imageId(0)
+
 {
     ui->setupUi(this);
     ui->spinBoxImageId->setMinimum(-1);
@@ -80,14 +83,15 @@ void MainWindow::onTimerAdvance()
     std::vector<float> inputs = images[imageId]->getPixels();
     // Compute
     float averageRatio = 0.0f;
+    int totalAge = 0;
     for(int i = 0 ; i < brainCount ; i++)
     {
         brains[i]->train(loopPerCompute, inputs, images[imageId]->getValue());
-        averageRatio += brains[i]->getRatio();
+        averageRatio += brains[i]->getRatio() * brains[i]->getAge();
+        totalAge += brains[i]->getAge();
     }
-    averageRatio /= (float)brainCount;
+    averageRatio /= (float)totalAge;
     Brain::setAverageRatio(averageRatio);
-
     //  Mutate ?
     if(!(steps %= Brain::getRoundToMutaion()))
     {
