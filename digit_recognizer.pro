@@ -18,14 +18,16 @@ SOURCES += main.cpp\
     brain.cpp \
     util.cpp \
     image.cpp \
-    brain_form.cpp
+    brain_form.cpp \
+    constants.cpp
 
 HEADERS  += main_window.hpp \
     neuron.hpp \
     brain.hpp \
     util.hpp \
     image.hpp \
-    brain_form.hpp
+    brain_form.hpp \
+    constants.hpp
 
 FORMS    += main_window.ui \
     brain_form.ui

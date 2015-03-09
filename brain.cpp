@@ -1,11 +1,16 @@
 #include "brain.hpp"
 
+#include "constants.hpp"
+
 int Brain::roundToMutation = 1000;
 float Brain::averageRatio = 0.0f;
 Brain * Brain::olderBrain = nullptr;
 int Brain::ageOlder = 0;
 Brain * Brain::bestBrain = nullptr;
 float Brain::bestRatio = 0;
+
+float Brain::mutationFrequency = 0.1f;
+float Brain::mutationIntensity = 0.1f;
 
 Brain::Brain(int neuronCount, int externalInputPerNeuronCount) :
     neurons(),
@@ -15,7 +20,7 @@ Brain::Brain(int neuronCount, int externalInputPerNeuronCount) :
     externalInputPerNeuronCount(0),
     dnaSize(0),
     age(0),
-    winsCount(0),
+    winCount(0),
     loseCount(0),
     ratio(1.0f),
     choiceCount(10)
@@ -28,14 +33,105 @@ Brain::Brain(int neuronCount, int externalInputPerNeuronCount) :
     buildPhenotype();
 }
 
-void Brain::setAverageRatio(float ratio)
+Brain::Brain(int neuronCount, int externalInputPerNeuronCount, QXmlStreamReader &xml) :
+    neurons(),
+    dna(),
+    neuronCount(neuronCount),
+    inputPerNeuronCount(0),
+    externalInputPerNeuronCount(0),
+    dnaSize(0),
+    age(0),
+    winCount(0),
+    loseCount(0),
+    ratio(1.0f),
+    choiceCount(10)
 {
-    Brain::averageRatio = ratio;
+    this->neuronCount = neuronCount;
+    this->externalInputPerNeuronCount = externalInputPerNeuronCount;
+    this->inputPerNeuronCount = neuronCount + externalInputPerNeuronCount;
+    this->dnaSize = neuronCount * inputPerNeuronCount;
+    load(xml);
+    buildPhenotype();
 }
 
-float Brain::getAverageRatio()
+Brain::~Brain()
 {
-    return Brain::averageRatio;
+    if(this == Brain::olderBrain)
+    {
+        Brain::olderBrain = nullptr;
+        Brain::ageOlder = 0;
+    }
+    for(int i = 0 ; i < neurons.size(); i++)
+    {
+        delete neurons[i];
+    }
+}
+
+void Brain::save(QXmlStreamWriter &xml)
+{
+    xml.writeStartElement(ConstantStrings::brain); // Attributs x 5
+    {
+        xml.writeTextElement(ConstantStrings::age, QString::number(age));
+        xml.writeTextElement(ConstantStrings::winCount, QString::number(winCount));
+        xml.writeTextElement(ConstantStrings::loseCount, QString::number(loseCount));
+        xml.writeTextElement(ConstantStrings::dnaSize, QString::number(dna.size()));
+        QString dnastr;
+        for(unsigned int i = 0 ; i < dna.size() ; i++)
+        {
+            dnastr += QString::number(dna[i]) + ";";
+        }
+        dnastr.remove(dnastr.size()-1, 1);
+        xml.writeTextElement(ConstantStrings::dna, dnastr);
+    }
+    xml.writeEndElement();
+}
+
+void Brain::load(QXmlStreamReader & xml)
+{
+    // Attributs x 5
+    int age = 0;
+    int winCount = 0;
+    int loseCount = 0;
+    int dnaSize = 0;
+    QString dnastr;
+    //
+    while(!xml.atEnd()
+          && !(xml.name() == ConstantStrings::brain && xml.tokenType() == QXmlStreamReader::EndElement))
+    {
+        QXmlStreamReader::TokenType token = xml.readNext();
+        if(token == QXmlStreamReader::StartElement) // Attributs x 5
+        {
+            if(xml.name() == ConstantStrings::age)
+                age = xml.readElementText().toFloat();
+            if(xml.name() == ConstantStrings::winCount)
+                winCount = xml.readElementText().toFloat();
+            if(xml.name() == ConstantStrings::loseCount)
+                loseCount = xml.readElementText().toFloat();
+            if(xml.name() == ConstantStrings::dnaSize)
+                dnaSize = xml.readElementText().toInt();
+            if(xml.name() == ConstantStrings::dna)
+                dnastr = xml.readElementText();
+
+        }
+    }
+    //
+    this->age = age;
+    this->winCount = winCount;
+    this->loseCount = loseCount;
+    this->dnaSize = dnaSize;
+    QStringList list = dnastr.split(';');
+    if(list.size() == this->dnaSize)
+    {
+        dna.clear();
+        for (int i = 0; i < list.size(); ++i)
+        {
+            dna.push_back(list[i].toFloat());
+        }
+    }
+    else
+    {
+        qWarning() << "DNA size doesn't match";
+    }
 }
 
 int Brain::getRoundToMutaion()
@@ -72,14 +168,14 @@ void Brain::train(float loop, std::vector<float> inputs, int wantedValue)
     }
 }
 
-void Brain::mutateDna(float r1, float r2, float r3)
+void Brain::mutateDna()
 {
     for(unsigned int i = 0 ; i < dnaSize ; i++)
     {
-        if(rand() < RAND_MAX * r1) // ratio apparition mutation
+        if(rand() < RAND_MAX * Brain::mutationFrequency) // ratio apparition mutation
         {
             float rand = std::rand() * 2 - RAND_MAX;
-            rand *= r2; // ratio importance de la mutation
+            rand *= Brain::mutationIntensity; // ratio importance de la mutation
             rand /=  RAND_MAX;
             dna[i] += rand;
             if(dna[i] > 1.0f)
@@ -88,9 +184,6 @@ void Brain::mutateDna(float r1, float r2, float r3)
                 dna[i] = -1.0f;
         }
     }
-    //  Mutation totale
-    if(rand() < RAND_MAX * r3) // ratio mutation totale
-        setRandomDna();
 }
 
 void Brain::compute(std::vector<float> inputs)
@@ -143,13 +236,13 @@ const std::vector<float> & Brain::getDna()
 void Brain::addLose()
 {
     loseCount++;
-    ratio = (float)(winsCount) / (float)(winsCount + loseCount);
+    ratio = (float)(winCount) / (float)(winCount + loseCount);
 }
 
 void Brain::addWin()
 {
-    winsCount++;
-    ratio = (float)(winsCount) / (float)(winsCount + loseCount);
+    winCount++;
+    ratio = (float)(winCount) / (float)(winCount + loseCount);
 }
 
 float Brain::getRatio()
@@ -159,7 +252,7 @@ float Brain::getRatio()
 
 int Brain::getWinCount()
 {
-    return winsCount;
+    return winCount;
 }
 
 int Brain::getLoseCount()
@@ -190,19 +283,14 @@ void Brain::mutateMaybe()
             ageOlder = 0;
         age = 0;
         ratio = 0;
-        winsCount = 0;
+        winCount = 0;
         loseCount = 0;
         setDna(Brain::olderBrain->getDna());
-        mutateDna(0.1, 0.1, 0.1);
+        mutateDna();
         buildPhenotype();
     }
 }
 
-
-Brain::~Brain()
-{
-
-}
 
 void Brain::setDna(std::vector<float> dna)
 {
@@ -218,7 +306,6 @@ void Brain::setDna(std::vector<float> dna)
         {
             this->dna[i] = dna[i];
         }
-        //buildPhenotype();
     }
 }
 
@@ -235,7 +322,7 @@ void Brain::setRandomDna()
 void Brain::buildPhenotype()
 {
     // Delete
-    for(int i =  0 ; i < neurons.size() ; i++)
+    for(unsigned int i =  0 ; i < neurons.size() ; i++)
     {
         delete neurons[i];
     }
