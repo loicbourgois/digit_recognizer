@@ -199,7 +199,7 @@ void Brain::compute(std::vector<float> inputs)
     }
 }
 
-int Brain::getDecision()
+/*int Brain::getDecision()
 {
     int decision = -1;
     float decisionRatio = -1.0f;
@@ -221,7 +221,30 @@ int Brain::getDecision()
         }
     }
     return decision;
+}*/
+
+
+
+int Brain::getDecision()
+{
+    int decision = -1;
+    float decisionRatio = -1.0f;
+
+    for(int i = 0 ; i < choiceCount ; i++)
+    {
+        if(neurons[i]->getOutput() > decisionRatio)
+        {
+            decisionRatio = neurons[i]->getOutput();
+            decision = i;
+        }
+    }
+    return decision;
 }
+
+
+
+
+
 
 int Brain::getAge()
 {
